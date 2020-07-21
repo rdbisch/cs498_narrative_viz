@@ -2,12 +2,82 @@
 <head>
     <title>CS498-dv Narrative Visualization Project - Essay</title>
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
   </head>
   <body>
     https://doi.pangaea.de/10.1594/PANGAEA.909132 Accessed 7/18/2020 @ 9am
-    
 
+    <input id="year" type="text" onchange="dataLoad()"></input>
+
+    <div id="my_dataviz">
+        <svg id="map" width="960", height="500">
+            <g id="ocean">
+                <rect x="0" y="0" width="960" height="500" fill="#add8e6"></rect>
+            </g>
+            <g id="base"></g>
+            <g id="data"></g>
+        </svg>
+    </div>
+
+    <script>
+        function minmax(data, el){
+        }
+    </script>
+
+    <script>
+        var count = 10;
+        var projection = d3.geoNaturalEarth1();       
+        var path = d3.geoPath().projection(projection);
+        var globalData;
+
+        function normalizeValue(v) {
+            return (v - 3.45) / (10.42);
+        }
+
+        d3.json("data/world-110m.geojson").then(function(data) {
+            console.log(data);
+            var g = d3.select("#base");
+            g.append("path")
+                .attr("d", path(data))
+                .attr("stroke", "black")
+                .attr("fill", "white");
+        });
+
+        d3.dsv(",", "data/wheat_only.csv", function(d) {
+                var result = {
+                    crop: d.crops,
+                    year: +d.years,
+                    lat: +d.lat,
+                    lon: +d.lon,
+                    value: +d.value,
+                };
+                if (count > 0) {
+                    console.log(result);
+                    count = count - 1;
+                }
+                return result;
+            }).then(function(data) { globalData = data; });
+
+        var myColor = d3.scaleSequential().domain([-4,4]).interpolator(d3.interpolateGreens);
+        
+        function dataLoad(crop = "wheat") {
+            console.log("dataLoad called");
+            year = +document.getElementById("year").value;
+            var temp = globalData.filter(
+                function(d) { return (d.year == year && d.crop == crop); }
+            );
+            var g = d3.select("#data");
+            var u = g.selectAll("circle").data(temp);
+
+            u.enter()
+                .append("circle")
+                .merge(u)
+                .style("fill", function(d) { return myColor(normalizeValue(d.value)); })
+                .attr("cy", function(d) { return projection([d.lon, d.lat])[1]; })
+                .attr("cx", function(d) { return projection([d.lon, d.lat])[0]; })
+                .attr("r", 1)               
+                ;
+            u.exit().remove();
+        }
+    </script> 
   </body>
 </html>
