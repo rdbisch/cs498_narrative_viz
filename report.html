@@ -1,0 +1,399 @@
+<html>
+    <head>
+        <title>CS498-dv Narrative Visualization Project - View 1</title>
+        <script src="https://d3js.org/d3.v5.min.js"></script>
+        <style type="text/css">
+        body {
+            font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+            font-weight: 300;
+            background-image: url("wrigley.jpg");
+            background-color: #eaffd5;
+        }
+
+        th {
+            border-bottom: thick double;
+        }
+
+        tfoot td {
+            border-top: solid
+        }
+
+        td {
+            padding:0 15px;
+        }
+
+        tbody {
+            
+        }
+
+        table.center {            
+            margin: auto;
+            display: block;
+        }
+
+        div.container {
+            margin: auto;
+            width: 60%;
+        }
+
+        div.row {
+            margin: 10px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 100%;
+            display: inline-block
+        }
+
+        div.chart {
+            display: block;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        figure.scene {            
+            margin: 4pt;
+            padding: 16pt;
+        }
+
+        figcaption {
+            font-style: italic;
+        }
+
+        p.caption {
+            text-align: center;
+
+        }
+
+        </style>
+
+        <script src="parse_baseball.js"></script>
+    </head>
+    <body onload="loadData()">
+        <div class="container">
+            <div class="row">
+                <p><em>These pages are part of rdb4@illinois.edu / rdbisch@gmail.com project for CS498 Data Visualization.</em></p>
+                
+                <p>This narrative visualization is based on the <a href="http://www.seanlahman.com/baseball-archive/statistics/">2019 Lahman Baseball database</a>
+                    with a variety of filters applied to simplify the analysis:
+                    <ul>
+                        <li>We restrict analysis to non-pitchers only as the analysis focuses heavily on batting performance.   In the National Legague, pitchers bat, but are notriously bad at it.  In the American League, pitchers do not bat.</li>
+                        <li>We calculate the player's primary position as the position they most often started in.  This may not coincide with their identified position in offical stats.
+                        <li>We treat teams that have changed identification over the years as being one in the same.  In particular, California Angels or Los Angelas Angels or Anaheim, are all treated as "Angels".  Similarly for Marlins and Brewers teams.
+                        <li>We are only looking at seasons where salary data was readily available, which translates into 1984 and beyond.
+                        <li>To avoid the high variance of players with few plate appearences, we are restricting this analysis to players with only 100 or more at-bats.</li>            </ul>
+                    </ul>
+                </p>
+            </div>
+            <div class="row">
+                <h1>An Analysis of Baseball Salary and Player Effectiveness</h1>
+                <h4>Baseball salaries have been outpacing inflation year over year since data was available.  Is player performance keeping pace?</h4>
+            </div>
+            <div class="row">
+                <figure class="scene">
+                        <svg id="cpichart" viewBox="0 0 1000 500" width="100%" height="400">                        
+                        </svg>
+                    <div id="cpiannotate" class="chart"></div>
+                    <figcaption>Chart showing relative growth of the Consumer Price Index (CPI) compared to the total salaries paid to baseball players.  CPI data sourced from the <a href="https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-">Federal Reserve Bank of Minneapolis</a></figcaption>
+                </figure>                
+            </div>
+            <div class="row">
+                <p>We attempt to figure out if this dramatic increase is justified. Are teams getting
+                    better talent for the dollar, are they doing enough to compete? Or would they be
+                    just as effective without paying for superstar talent?
+                </p>
+
+            </div>
+        </div>
+
+        <script>
+            /* Global holders for CPI and baseball data */
+            var cpi_data = null;
+            var baseball_data = null;
+
+            /* Load the data! */
+            function loadData() {
+                d3.json("data/CPI.json").then(function(data) {
+                    cpi_data = data;
+                    if (baseball_data != null) ready();
+                });
+                d3.csv("data/baseball_data.csv", importLahman).then(function(data) {
+                    baseball_data = data;
+                    if (cpi_data != null) ready();
+                });
+            }
+
+            /* Calculate the angle of triangle ABC given by the coordinates */
+            function calcAngle(coords) {
+                var w = coords[1] - coords[0];
+                var h = coords[3] - coords[2];                
+                var angle = Math.atan(h/w) * 180 / Math.PI;
+                return angle;
+            }
+
+            /* This function directly from Elias Zamaria's answer
+             * https://stackoverflow.com/questions/2901102/how-to-print-a-number-with-commas-as-thousands-separators-in-javascript */
+            function numberWithCommas(x) {
+                return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+            }
+
+            /* Encapsulate logic to draw CPI vs Salary chart */
+            function cpiChart() {
+                margin = {top: 20, bottom: 20, left: 20, right: 20};
+                width = 1000;
+                height = 500;
+                plotArea = [width - margin.left - margin.right, height - margin.top - margin.bottom ];
+
+                var svg = d3.select("#cpichart");
+                var xAxis = d3.scaleLinear()
+                    .domain(d3.extent(combinedSalaryCPI, d => d.year))
+                    .range([margin.left, plotArea[0]]);
+
+                var t_yAxis = [0, d3.max(combinedSalaryCPI, d => d.relative_salary)];
+                var yAxis = d3.scaleLinear()
+                    .domain(t_yAxis)
+                    .range([plotArea[1], margin.bottom]);
+
+                var line = d3.line()
+                    .x( d => xAxis(d.year) )
+                    .y( d => yAxis(d.relative_cpi));
+
+                /* Missing data for salary is represented as 0, so make sure 
+                 *  we skip it */
+                var line2 = d3.line()
+                    .defined( d => d.relative_salary > 0 )
+                    .x( d => xAxis(d.year) )
+                    .y( d => yAxis(d.relative_salary));
+
+                var line3 = d3.line()
+                    .x( d => xAxis(d.x) )
+                    .y( d => yAxis(d.y) );
+
+                svg.append("path")
+                    .datum(combinedSalaryCPI)        
+                    .attr("d", line)
+                    .attr("fill", "none")
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 3);
+
+                svg.append("path")
+                    .datum(combinedSalaryCPI)
+                    .attr("d", line2)
+                    .attr("fill", "none")
+                    .attr("stroke", "green")
+                    .attr("stroke-width", 3);
+
+                /* Draw the dotted grey baseline */
+                svg.append("path")
+                    .datum([{ x: 1985, y: 1.0},{ x: 2016, y: 1.0 }])
+                    .attr("d", line3)
+                    .attr("fill", "none")
+                    .attr("stroke", "grey")
+                    .attr("stroke-width", 3)
+                    .attr("stroke-dasharray", "5,5");
+                    
+                /* Highlight a specific year and annotate it */
+                function updateSelection(selectedPoint) {    
+                    console.log("Updating selection with year " + selectedPoint);            
+                    var t = combinedSalaryCPI[selectedPoint - 1981];
+                    var subset = [
+                        {x: selectedPoint,
+                        y: 1.0,
+                        type: "baseline"},
+                        
+                        {x: selectedPoint,
+                        y: t.relative_cpi,
+                        type: "cpi_rel"},
+
+                        {x: selectedPoint,
+                        y: t.relative_salary,
+                        type: "salary_rel"}
+                    ]
+                    svg.selectAll("circle.selection")
+                        .data(subset)
+                        .join(
+                            enter => enter.append("circle")
+                                .attr("class", "selection")
+                                .attr("fill", "none")
+                                .attr("stroke-width", 3))
+                        .attr("cx", d => xAxis(d.x))
+                        .attr("cy", d => yAxis(d.y))
+                        .attr("r", width / 100)
+                        .attr("stroke", 
+                            function(d) {
+                                if (d.type == "baseline") return "grey";
+                                else if (d.type == "cpi_rel") return "black";
+                                else if (d.type == "salary_rel") return "green";
+                            })
+                    
+                    svg.selectAll("path.selection")
+                        .data([0])
+                        .join(
+                            enter => enter.append("path")
+                        )
+                        .datum(subset)
+                        .attr("class", "selection")
+                        .attr("d", line3)
+                        .attr("fill", "none")
+                        .attr("stroke", "grey")
+                        .attr("stroke-width", 3)
+                        .attr("stroke-dasharray", "1,5");
+
+                    var table = d3.select("#cpiannotate");
+
+                    table.selectAll("table.selection")
+                        .data([0])
+                        .join(
+                            enter => enter.append("table")
+                                .attr("class", "selection")
+                                .attr("align", "center")
+                        );
+
+                    var header = table.selectAll("thead")
+                        .data([0])
+                        .join(
+                            enter => enter.append("thead").append("tr")
+                        );
+                    header.selectAll("th")
+                        .data(["Year", "CPI", "Salary"])
+                        .join(
+                            enter => enter.append("th")
+                                .text( d=> d )
+                        );
+
+                    var tablebody = table.selectAll("tbody")
+                        .data([0])
+                        .join(
+                            enter => enter.append("tbody")
+                        );
+
+                    var rows = tablebody.selectAll("tr")
+                            .data([
+                                combinedSalaryCPI[1985 - 1981],
+                                combinedSalaryCPI[selectedPoint - 1981]
+                            ])
+                            .join(
+                                enter => enter.append("tr")
+                            );
+                    var cells = rows.selectAll("td")
+                            .data(function(d) {
+                                return [d.year, d.cpi.toFixed(1).toString(), numberWithCommas(d.salary)];
+                            })
+                            .join(
+                                enter => enter.append("td")
+                                    .attr("align", "right")
+                            )
+                            .text(d => d);
+
+                    var footer = table.selectAll("tfoot")
+                        .data([0])
+                        .join(
+                            enter => enter.append("tfoot").append("tr")
+                        );
+                    footer.selectAll("td")
+                            .data(["relative growth", t.relative_cpi.toFixed(2), t.relative_salary.toFixed(2)])
+                            .join(
+                                enter => enter.append("td")
+                                    .attr("align", "right")
+                            )
+                            .text( d => d );                
+                }
+
+                currentSelection = 2000;
+                updateSelection(currentSelection);
+
+                svg.append('rect') // append a rect to catch mouse movements on canvas
+                    .attr('width', width) // can't catch mouse events on a g element
+                    .attr('height', height)
+                    .attr('fill', 'none')
+                    .attr('pointer-events', 'all')
+                    .on('mousemove', function() { // mouse moving over canvas
+                        var mouse = d3.mouse(this);                        
+                        var xYear = Math.floor(xAxis.invert(mouse[0]));                        
+                        if (xYear < 1981) xYear = 1981;
+                        if (xYear > 2016) xYear = 2016;
+                        console.log(xYear);
+                        if (xYear != currentSelection) {
+                            updateSelection(xYear);
+                            currentSelection = xYear;
+                        }
+                    });
+
+                svg.append("text")
+                    .attr("x", xAxis(1996))
+                    .attr("y", yAxis(1) + 15)
+                    .text("1985 Baseline")
+                    .attr("fill", "#888888");
+
+                /* Because both the CPI and baseball curves are increasing
+                 *  prettty drasitcally and monotonically, I thought it'd be
+                 *  cool to draw the labels mimicking their rough rate of growth.
+                 *  All this code does is figure out what angle to draw the text
+                 *   at and then draws it.
+                 */
+                var s = combinedSalaryCPI[1996 - 1981];
+                var t = combinedSalaryCPI[2003 - 1981];
+                var cpi_angle = calcAngle([xAxis(s.year), xAxis(t.year),
+                    yAxis(s.relative_cpi), yAxis(t.relative_cpi)]);
+                var baseball_angle = calcAngle([xAxis(s.year), xAxis(t.year),
+                    yAxis(s.relative_salary), yAxis(t.relative_salary)]);
+                svg.append("text")
+                    .attr("x", xAxis(s.year))
+                    .attr("y", yAxis(s.relative_cpi) - 10)
+                    .text("Consumer Price Index")
+                    .attr("transform", "rotate(" + cpi_angle + " " + xAxis(s.year) + "," + yAxis(s.relative_cpi) + ")");
+
+                svg.append("text")
+                    .attr("x", xAxis(s.year))
+                    .attr("y", yAxis(s.relative_salary) - 10)
+                    .text("Baseball Salaries")
+                    .attr("fill", "green")
+                    .attr("transform", "rotate(" + baseball_angle + " " + xAxis(s.year) + "," + yAxis(s.relative_salary) + ")");
+
+                /* Add axis labels */
+                svg.append("g")
+                    .attr("transform", "translate(0," + (plotArea[1]) + ")")
+                    .call(d3.axisBottom().scale(xAxis).tickFormat(d => d.toString()));
+                svg.append("g")
+                    .call(d3.axisLeft().scale(yAxis));
+
+                /* Add an explanation of the yAxis */
+                svg.append("text")
+                    .attr("x", margin.left)
+                    .attr("y", margin.top)
+                    .text("Relative Growth from 1985 level")
+                    .attr("transform", "rotate(90 " + margin.left + "," + margin.right + ")");
+                    ;
+
+                return svg;
+            }
+
+            /** Process data once ready and draw charts **/
+            function ready() {
+                // Create summarization of baseball salary by year
+                yearRange = [1985, 2016];
+                var t_cpibase = cpi_data.CPI[yearRange[0] - 1981];
+                var t_salarybase = sumBaseballSalary(yearRange[0]);
+                combinedSalaryCPI = []
+                cpi_data.CPI.forEach((el, idx) => {
+                    let Y = cpi_data.year[idx];
+                    let S = sumBaseballSalary(Y)
+                    let T = {
+                        "year": Y,
+                        "cpi": el,
+                        "salary": S,
+                        "relative_cpi": el / t_cpibase,
+                        "relative_salary": S / t_salarybase
+                    }
+                    combinedSalaryCPI.push(T);
+                });
+
+                console.log(combinedSalaryCPI);
+                var cpiC = cpiChart();
+
+            }
+        </script>
+
+
+    </body>
+</html>
