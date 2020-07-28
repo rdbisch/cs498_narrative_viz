@@ -87,7 +87,7 @@ WHERE t1.yearID = t2.yearID
 SELECT COUNT(*) FROM temp_t3;
 
 /* Get rid of players with only few at-bats */
-DELETE FROM temp_t3 WHERE AB < 50;
+DELETE FROM temp_t3 WHERE AB < 1;
 
 SELECT COUNT(*) FROM temp_t3;
 

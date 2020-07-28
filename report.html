@@ -2,6 +2,7 @@
     <head>
         <title>CS498-dv Narrative Visualization Project - View 1</title>
         <script src="https://d3js.org/d3.v5.min.js"></script>
+
         <style type="text/css">
         body {
             font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
@@ -67,11 +68,15 @@
 
         </style>
 
+        <script src="cpi_chart.js"></script>
+        <script src="ops_chart.js"></script>
         <script src="parse_baseball.js"></script>
     </head>
     <body onload="loadData()">
         <div class="container">
             <div class="row">
+                <h1>An Analysis of Baseball Salary and Player Effectiveness</h1>
+                <h4>Baseball salaries have been outpacing inflation year over year since data was available.  Is player performance keeping pace?</h4>
                 <p><em>These pages are part of rdb4@illinois.edu / rdbisch@gmail.com project for CS498 Data Visualization.</em></p>
                 
                 <p>This narrative visualization is based on the <a href="http://www.seanlahman.com/baseball-archive/statistics/">2019 Lahman Baseball database</a>
@@ -81,36 +86,80 @@
                         <li>We calculate the player's primary position as the position they most often started in.  This may not coincide with their identified position in offical stats.
                         <li>We treat teams that have changed identification over the years as being one in the same.  In particular, California Angels or Los Angelas Angels or Anaheim, are all treated as "Angels".  Similarly for Marlins and Brewers teams.
                         <li>We are only looking at seasons where salary data was readily available, which translates into 1984 and beyond.
-                        <li>To avoid the high variance of players with few plate appearences, we are restricting this analysis to players with only 100 or more at-bats.</li>            </ul>
                     </ul>
+
+                    <p>Icons from https://www.sportslogos.net/teams/list_by_year/42019/2019_MLB_Logos/</p>
                 </p>
-            </div>
-            <div class="row">
-                <h1>An Analysis of Baseball Salary and Player Effectiveness</h1>
-                <h4>Baseball salaries have been outpacing inflation year over year since data was available.  Is player performance keeping pace?</h4>
+
             </div>
             <div class="row">
                 <figure class="scene">
-                        <svg id="cpichart" viewBox="0 0 1000 500" width="100%" height="400">                        
+                        <svg id="cpichart" viewBox="0 0 1000 500" width="100%" height="600">                        
                         </svg>
                     <div id="cpiannotate" class="chart"></div>
                     <figcaption>Chart showing relative growth of the Consumer Price Index (CPI) compared to the total salaries paid to baseball players.  CPI data sourced from the <a href="https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-">Federal Reserve Bank of Minneapolis</a></figcaption>
                 </figure>                
             </div>
             <div class="row">
-                <p>We attempt to figure out if this dramatic increase is justified. Are teams getting
-                    better talent for the dollar, are they doing enough to compete? Or would they be
+                <p>Is this dramatic increase justified based on player performance? Are teams getting
+                    better talent for the dollar as time goes on? Would they be
                     just as effective without paying for superstar talent?
                 </p>
 
+                <p>A statistic called wins-above-replacement, or WAR for short, has emerged in the last few years as an important
+                    metric of player performance.  The statistic answers the question "How many wins did an individual player contribute
+                    to the team?" by comparing the players performance against any other random player in the league. 
+                    
+                <p>The modeling of this variable takes into account the players batting performance, fielding performance, and controls
+                    for factors like varying pitching ability and field elevation.   
+
+                <p>We will focus our analysis on the batting components of WAR.  In partciular, we will look at on-base percentage
+                    relative to average league performance and SLUGing average (number of bases on average per hit) relative to league 
+                    performance.  The sum of these statistics, OPS_PLUS, is a major factor in WAR calculations.
+
+                <p>As a gentle introduction, let's consider everyone's favorite team the Chicago Cubs, a team that notriously spends 
+                    lots on player's salary, to their rivals from the southside, the Chicago White Sox.  
+                </p>
+            </div>
+            <div class="row">
+                <figure class="scene">
+                    <form id="opsform">
+                        <label for="team1">Team #1</label>
+                        <!-- Form gets populated by d3 below -->
+                        <select name="team1" id="team1">                            
+                        </select>
+                        <label for="team2">Team #2</label>
+                        <select name="team2" id="team2">                            
+                        </select>
+                    </form>
+                    <svg id="opschart" viewBox="0 0 1000 500" width="100%" height="600">                        
+                    </svg>
+                    <div id="opsannotate" class="chart"></div>
+                    <figcaption>Chart showing weighted average OPS_PLUS over time for selected teams</figcaption>
+                </figure> 
+            </div>
+            <div class="row">
+                <p>The two teams shown don't display much of an improvement in trend.  In fact with every team we've looked at
+                    there is not much of a trend at all.
+                    
+                <p>Not a very compelling case--certainly not one to justify $2 Billion in salary.
+
+                <p>Still, there might be reasons other than performance to justify these salaries--the popularity
+                    of baseball may have been increased, the player's themselves did a better job of negotiation, 
+                    or there may be yet more confounds.
+
+                <p>Another potential issue is that, by averaging the entire team's OPS_PLUS, we have washed out the 
+                    effect of the best players.   In the chart below, we isolate the highest performing player for 
+                    each team, and normalize by their salary.  That is to say, we look at who has the highest AB*OPS_PLUS / Salary
+                    on each team, year combination.  If team's are getting better at scouting talent and getting breakout
+                    players, it should show up here.
             </div>
         </div>
-
         <script>
             /* Global holders for CPI and baseball data */
             var cpi_data = null;
             var baseball_data = null;
-
+            var agg_baseball = null;
             /* Load the data! */
             function loadData() {
                 d3.json("data/CPI.json").then(function(data) {
@@ -137,237 +186,6 @@
                 return x.toString().replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
             }
 
-            /* Encapsulate logic to draw CPI vs Salary chart */
-            function cpiChart() {
-                margin = {top: 20, bottom: 20, left: 20, right: 20};
-                width = 1000;
-                height = 500;
-                plotArea = [width - margin.left - margin.right, height - margin.top - margin.bottom ];
-
-                var svg = d3.select("#cpichart");
-                var xAxis = d3.scaleLinear()
-                    .domain(d3.extent(combinedSalaryCPI, d => d.year))
-                    .range([margin.left, plotArea[0]]);
-
-                var t_yAxis = [0, d3.max(combinedSalaryCPI, d => d.relative_salary)];
-                var yAxis = d3.scaleLinear()
-                    .domain(t_yAxis)
-                    .range([plotArea[1], margin.bottom]);
-
-                var line = d3.line()
-                    .x( d => xAxis(d.year) )
-                    .y( d => yAxis(d.relative_cpi));
-
-                /* Missing data for salary is represented as 0, so make sure 
-                 *  we skip it */
-                var line2 = d3.line()
-                    .defined( d => d.relative_salary > 0 )
-                    .x( d => xAxis(d.year) )
-                    .y( d => yAxis(d.relative_salary));
-
-                var line3 = d3.line()
-                    .x( d => xAxis(d.x) )
-                    .y( d => yAxis(d.y) );
-
-                svg.append("path")
-                    .datum(combinedSalaryCPI)        
-                    .attr("d", line)
-                    .attr("fill", "none")
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 3);
-
-                svg.append("path")
-                    .datum(combinedSalaryCPI)
-                    .attr("d", line2)
-                    .attr("fill", "none")
-                    .attr("stroke", "green")
-                    .attr("stroke-width", 3);
-
-                /* Draw the dotted grey baseline */
-                svg.append("path")
-                    .datum([{ x: 1985, y: 1.0},{ x: 2016, y: 1.0 }])
-                    .attr("d", line3)
-                    .attr("fill", "none")
-                    .attr("stroke", "grey")
-                    .attr("stroke-width", 3)
-                    .attr("stroke-dasharray", "5,5");
-                    
-                /* Highlight a specific year and annotate it */
-                function updateSelection(selectedPoint) {    
-                    console.log("Updating selection with year " + selectedPoint);            
-                    var t = combinedSalaryCPI[selectedPoint - 1981];
-                    var subset = [
-                        {x: selectedPoint,
-                        y: 1.0,
-                        type: "baseline"},
-                        
-                        {x: selectedPoint,
-                        y: t.relative_cpi,
-                        type: "cpi_rel"},
-
-                        {x: selectedPoint,
-                        y: t.relative_salary,
-                        type: "salary_rel"}
-                    ]
-                    svg.selectAll("circle.selection")
-                        .data(subset)
-                        .join(
-                            enter => enter.append("circle")
-                                .attr("class", "selection")
-                                .attr("fill", "none")
-                                .attr("stroke-width", 3))
-                        .attr("cx", d => xAxis(d.x))
-                        .attr("cy", d => yAxis(d.y))
-                        .attr("r", width / 100)
-                        .attr("stroke", 
-                            function(d) {
-                                if (d.type == "baseline") return "grey";
-                                else if (d.type == "cpi_rel") return "black";
-                                else if (d.type == "salary_rel") return "green";
-                            })
-                    
-                    svg.selectAll("path.selection")
-                        .data([0])
-                        .join(
-                            enter => enter.append("path")
-                        )
-                        .datum(subset)
-                        .attr("class", "selection")
-                        .attr("d", line3)
-                        .attr("fill", "none")
-                        .attr("stroke", "grey")
-                        .attr("stroke-width", 3)
-                        .attr("stroke-dasharray", "1,5");
-
-                    var table = d3.select("#cpiannotate");
-
-                    table.selectAll("table.selection")
-                        .data([0])
-                        .join(
-                            enter => enter.append("table")
-                                .attr("class", "selection")
-                                .attr("align", "center")
-                        );
-
-                    var header = table.selectAll("thead")
-                        .data([0])
-                        .join(
-                            enter => enter.append("thead").append("tr")
-                        );
-                    header.selectAll("th")
-                        .data(["Year", "CPI", "Salary"])
-                        .join(
-                            enter => enter.append("th")
-                                .text( d=> d )
-                        );
-
-                    var tablebody = table.selectAll("tbody")
-                        .data([0])
-                        .join(
-                            enter => enter.append("tbody")
-                        );
-
-                    var rows = tablebody.selectAll("tr")
-                            .data([
-                                combinedSalaryCPI[1985 - 1981],
-                                combinedSalaryCPI[selectedPoint - 1981]
-                            ])
-                            .join(
-                                enter => enter.append("tr")
-                            );
-                    var cells = rows.selectAll("td")
-                            .data(function(d) {
-                                return [d.year, d.cpi.toFixed(1).toString(), numberWithCommas(d.salary)];
-                            })
-                            .join(
-                                enter => enter.append("td")
-                                    .attr("align", "right")
-                            )
-                            .text(d => d);
-
-                    var footer = table.selectAll("tfoot")
-                        .data([0])
-                        .join(
-                            enter => enter.append("tfoot").append("tr")
-                        );
-                    footer.selectAll("td")
-                            .data(["relative growth", t.relative_cpi.toFixed(2), t.relative_salary.toFixed(2)])
-                            .join(
-                                enter => enter.append("td")
-                                    .attr("align", "right")
-                            )
-                            .text( d => d );                
-                }
-
-                currentSelection = 2000;
-                updateSelection(currentSelection);
-
-                svg.append('rect') // append a rect to catch mouse movements on canvas
-                    .attr('width', width) // can't catch mouse events on a g element
-                    .attr('height', height)
-                    .attr('fill', 'none')
-                    .attr('pointer-events', 'all')
-                    .on('mousemove', function() { // mouse moving over canvas
-                        var mouse = d3.mouse(this);                        
-                        var xYear = Math.floor(xAxis.invert(mouse[0]));                        
-                        if (xYear < 1981) xYear = 1981;
-                        if (xYear > 2016) xYear = 2016;
-                        console.log(xYear);
-                        if (xYear != currentSelection) {
-                            updateSelection(xYear);
-                            currentSelection = xYear;
-                        }
-                    });
-
-                svg.append("text")
-                    .attr("x", xAxis(1996))
-                    .attr("y", yAxis(1) + 15)
-                    .text("1985 Baseline")
-                    .attr("fill", "#888888");
-
-                /* Because both the CPI and baseball curves are increasing
-                 *  prettty drasitcally and monotonically, I thought it'd be
-                 *  cool to draw the labels mimicking their rough rate of growth.
-                 *  All this code does is figure out what angle to draw the text
-                 *   at and then draws it.
-                 */
-                var s = combinedSalaryCPI[1996 - 1981];
-                var t = combinedSalaryCPI[2003 - 1981];
-                var cpi_angle = calcAngle([xAxis(s.year), xAxis(t.year),
-                    yAxis(s.relative_cpi), yAxis(t.relative_cpi)]);
-                var baseball_angle = calcAngle([xAxis(s.year), xAxis(t.year),
-                    yAxis(s.relative_salary), yAxis(t.relative_salary)]);
-                svg.append("text")
-                    .attr("x", xAxis(s.year))
-                    .attr("y", yAxis(s.relative_cpi) - 10)
-                    .text("Consumer Price Index")
-                    .attr("transform", "rotate(" + cpi_angle + " " + xAxis(s.year) + "," + yAxis(s.relative_cpi) + ")");
-
-                svg.append("text")
-                    .attr("x", xAxis(s.year))
-                    .attr("y", yAxis(s.relative_salary) - 10)
-                    .text("Baseball Salaries")
-                    .attr("fill", "green")
-                    .attr("transform", "rotate(" + baseball_angle + " " + xAxis(s.year) + "," + yAxis(s.relative_salary) + ")");
-
-                /* Add axis labels */
-                svg.append("g")
-                    .attr("transform", "translate(0," + (plotArea[1]) + ")")
-                    .call(d3.axisBottom().scale(xAxis).tickFormat(d => d.toString()));
-                svg.append("g")
-                    .call(d3.axisLeft().scale(yAxis));
-
-                /* Add an explanation of the yAxis */
-                svg.append("text")
-                    .attr("x", margin.left)
-                    .attr("y", margin.top)
-                    .text("Relative Growth from 1985 level")
-                    .attr("transform", "rotate(90 " + margin.left + "," + margin.right + ")");
-                    ;
-
-                return svg;
-            }
-
             /** Process data once ready and draw charts **/
             function ready() {
                 // Create summarization of baseball salary by year
@@ -388,12 +206,51 @@
                     combinedSalaryCPI.push(T);
                 });
 
+                agg_baseball = createAggBaseball();
+                
+                console.log(agg_baseball);
                 console.log(combinedSalaryCPI);
-                var cpiC = cpiChart();
+                cpiChart();
 
+                // Setup data for forms
+                form_input = []
+                for (var key of Object.keys(agg_baseball.team_dict).sort()) {
+                    form_input.push({
+                        name: key,
+                        value: key
+                    });
+                }
+                d3.select("#team1")
+                    .selectAll("option")
+                    .data(form_input)
+                    .enter()
+                    .append("option")
+                    .attr("value", d => d.name)
+                    .text( d => d.name )
+                    .attr("selected", function(d) { if (d.name == "Cubs") return true; else return null; })
+                    ;
+
+                d3.select("#team2")
+                    .selectAll("option")
+                    .data(form_input)
+                    .enter()
+                    .append("option")
+                    .attr("value", d => d.name)
+                    .text( d => d.name )
+                    .attr("selected", function(d) { if (d.name == "White Sox") return true; else return null; });
+
+                // Have to do this after the previous two statements to make sure
+                // both forms have data
+                d3.select("#team1").on('change', opsChartHelper);
+                d3.select("#team2").on('change', opsChartHelper);                    
+                opsChartHelper();
             }
+
+            function opsChartHelper() {
+                opsChart(d3.select("#team1").node().value,
+                         d3.select("#team2").node().value);
+            }
+
         </script>
-
-
     </body>
 </html>
