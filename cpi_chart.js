@@ -1,19 +1,21 @@
 /* Encapsulate logic to draw CPI vs Salary chart */
 function cpiChart() {
     margin = {top: 20, bottom: 20, left: 20, right: 20};
-    width = 1000;
+    width = 800;
     height = 500;
-    plotArea = [width - margin.left - margin.right, height - margin.top - margin.bottom ];
 
-    var svg = d3.select("#cpichart");
+    var svg = d3.select("#cpichart")
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
     var xAxis = d3.scaleLinear()
         .domain(d3.extent(combinedSalaryCPI, d => d.year))
-        .range([margin.left, plotArea[0]]);
+        .range([0, width - margin.left - margin.right]);
 
     var t_yAxis = [0, d3.max(combinedSalaryCPI, d => d.relative_salary)];
     var yAxis = d3.scaleLinear()
         .domain(t_yAxis)
-        .range([plotArea[1], margin.bottom]);
+        .range([height - margin.top - margin.bottom, 0]);
 
     var line = d3.line()
         .x( d => xAxis(d.year) )
@@ -213,7 +215,7 @@ function cpiChart() {
 
     /* Add axis labels */
     svg.append("g")
-        .attr("transform", "translate(0," + (plotArea[1]) + ")")
+        .attr("transform", "translate(0,"  + (height - margin.bottom - margin.top) + ")")
         .call(d3.axisBottom().scale(xAxis).tickFormat(d => d.toString()));
     svg.append("g")
         .call(d3.axisLeft().scale(yAxis));

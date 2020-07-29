@@ -70,6 +70,7 @@
 
         <script src="cpi_chart.js"></script>
         <script src="ops_chart.js"></script>
+        <script src="ops_chart2.js"></script>
         <script src="parse_baseball.js"></script>
     </head>
     <body onload="loadData()">
@@ -94,7 +95,7 @@
             </div>
             <div class="row">
                 <figure class="scene">
-                        <svg id="cpichart" viewBox="0 0 1000 500" width="100%" height="600">                        
+                        <svg id="cpichart" viewBox="0 0 800 500" width="100%">                        
                         </svg>
                     <div id="cpiannotate" class="chart"></div>
                     <figcaption>Chart showing relative growth of the Consumer Price Index (CPI) compared to the total salaries paid to baseball players.  CPI data sourced from the <a href="https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-">Federal Reserve Bank of Minneapolis</a></figcaption>
@@ -132,7 +133,7 @@
                         <select name="team2" id="team2">                            
                         </select>
                     </form>
-                    <svg id="opschart" viewBox="0 0 1000 500" width="100%" height="600">                        
+                    <svg id="opschart" viewBox="0 0 800 500" width="100%">                        
                     </svg>
                     <div id="opsannotate" class="chart"></div>
                     <figcaption>Chart showing weighted average OPS_PLUS over time for selected teams</figcaption>
@@ -153,6 +154,23 @@
                     each team, and normalize by their salary.  That is to say, we look at who has the highest AB*OPS_PLUS / Salary
                     on each team, year combination.  If team's are getting better at scouting talent and getting breakout
                     players, it should show up here.
+            </div>
+            <div class="row">
+                <figure class="scene">
+                    <form id="opsform2">
+                        <label for="team3">Team #1</label>
+                        <!-- Form gets populated by d3 below -->
+                        <select name="team3" id="team3">                            
+                        </select>
+                        <label for="team4">Team #2</label>
+                        <select name="team4" id="team4">                            
+                        </select>
+                    </form>
+                    <svg id="opschart2" viewBox="0 0 800 500" width="100%">                        
+                    </svg>
+                    <div id="opsannotate2" class="chart"></div>
+                    <figcaption>Chart showing performance of the best AB*OPS_PLUS statistic for selected teams.</figcaption>
+                </figure> 
             </div>
         </div>
         <script>
@@ -239,18 +257,30 @@
                     .text( d => d.name )
                     .attr("selected", function(d) { if (d.name == "White Sox") return true; else return null; });
 
-                // Have to do this after the previous two statements to make sure
-                // both forms have data
-                d3.select("#team1").on('change', opsChartHelper);
-                d3.select("#team2").on('change', opsChartHelper);                    
-                opsChartHelper();
-            }
 
-            function opsChartHelper() {
-                opsChart(d3.select("#team1").node().value,
-                         d3.select("#team2").node().value);
-            }
+                d3.select("#team3")
+                    .selectAll("option")
+                    .data(form_input)
+                    .enter()
+                    .append("option")
+                    .attr("value", d => d.name)
+                    .text( d => d.name )
+                    .attr("selected", function(d) { if (d.name == "Cubs") return true; else return null; })
+                    ;
 
+                d3.select("#team4")
+                    .selectAll("option")
+                    .data(form_input)
+                    .enter()
+                    .append("option")
+                    .attr("value", d => d.name)
+                    .text( d => d.name )
+                    .attr("selected", function(d) { if (d.name == "White Sox") return true; else return null; });
+
+
+                opsChart()
+                opsChart2();
+            }
         </script>
     </body>
 </html>

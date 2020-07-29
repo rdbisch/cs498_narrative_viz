@@ -74,7 +74,8 @@ function createAggBaseball() {
         OPS_PLUS: {},
         salary: {},
         AB: {},
-        ops_per_dollar: {}
+        ops_per_dollar: {},
+        best: {}
     }
     var t_y = {}
     var t_t = {}
@@ -133,11 +134,22 @@ function createAggBaseball() {
             result.salary[el.teamName] = {};
             result.ops_per_dollar[el.teamName] = {};
             result.AB[el.teamName] = {};
+            result.best[el.teamName] = {}
         }
         if (!(el.year in result.OPS_PLUS[el.teamName])) {
             result.OPS_PLUS[el.teamName][el.year] = 0;
             result.salary[el.teamName][el.year] = 0;
-            result.AB[el.teamName][el.year] = 0;                        
+            result.AB[el.teamName][el.year] = 0;
+            result.best[el.teamName][el.year] = {};
+        }
+
+        var t = result.best[el.teamName][el.year];
+        if (Object.keys(t).length == 0 ||
+            el.AB * el.OPS_PLUS > t.ops_plus_ab) {
+            t.ops_plus_ab = el.AB * el.OPS_PLUS;
+            t.salary = el.salary;
+            t.name = el.name;
+            result.best[el.teamName][+el.year] = t;
         }
         result.OPS_PLUS[el.teamName][+el.year] += el.AB * el.OPS_PLUS;
         result.salary[el.teamName][+el.year] += el.salary;
