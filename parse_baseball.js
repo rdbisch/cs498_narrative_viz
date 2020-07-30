@@ -127,6 +127,7 @@ function createAggBaseball() {
     t_t["Yankees"].icon = path + "nyy.gif";
 
     result.team_dict = t_t;
+    console.log(baseball_data);
 
     baseball_data.forEach((el, idx) => {
         if (!(el.teamName in result.OPS_PLUS)) {
@@ -146,9 +147,14 @@ function createAggBaseball() {
         var t = result.best[el.teamName][el.year];
         if (Object.keys(t).length == 0 ||
             el.AB * el.OPS_PLUS > t.ops_plus_ab) {
+            t.ops_plus = el.OPS_PLUS;
             t.ops_plus_ab = el.AB * el.OPS_PLUS;
             t.salary = el.salary;
             t.name = el.name;
+            t.AB = el.AB;
+            t.debutYear = el.debutYear;
+            t.salary = el.salary;
+            t.team = el.teamName;
             result.best[el.teamName][+el.year] = t;
         }
         result.OPS_PLUS[el.teamName][+el.year] += el.AB * el.OPS_PLUS;

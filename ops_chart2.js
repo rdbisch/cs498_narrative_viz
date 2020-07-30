@@ -2,7 +2,6 @@ opsChart2_setup = false;
 
 /* Encapsulate logic to draw CPI vs Salary chart */
 function opsChart2() {
-    console.log("opsChart2 blah blah");
     margin = {top: 20, bottom: 20, left: 20, right: 20};
     width = 800;
     height = 500;
@@ -23,16 +22,12 @@ function opsChart2() {
             if (!extent[0]) { extent = [t, t]; }
             if ( t < extent[0] ) extent[0] = t;
             if ( t > extent[1] ) extent[1] = t;
-            temp.push(
-                {
-                    year: key,
-                    name: value.name, 
-                    initials: initials(value.name),
-                    ops_plus_ab: value.ops_plus_ab,
-                    salary: value.salary,
-                    ratio: value.ops_plus_ab / value.salary
-                }
-            );
+
+            new_dict = value;
+            new_dict.year = key;
+            new_dict.ratio = value.ops_plus_ab / value.salary;
+            new_dict.initials = initials(value.name);
+            temp.push(new_dict);        
         }
         return temp;
     }
@@ -69,6 +64,119 @@ function opsChart2() {
         var t = d3.transition()
             .duration(1500);
 
+
+        function addDataToSelection(sel, P, className, iconPath, transX, linecolor) {
+            var g = sel.append("g")
+                .attr("class", className)
+                .attr("transform", "translate(" + transX + ", 0)");
+
+            /* Create the text information... pretty lengthy 
+             * code but simple enough, adding line by line to an SVG */
+            g.append("text") 
+                    .attr("class", "left")
+                    .append("tspan")
+                        .text(P.name)
+                        .attr("class", "playerName")                
+                        .attr("x", 0)
+                        .attr("dy", 25)
+                        .attr("font-size", 20)
+                        .attr("font-weight", "bold")
+                    .append("tspan")
+                        .text(P.year + " " + P.team + ", debuted in " + P.debutYear)
+                        .attr("class", "playerYear")
+                        .attr("x", 0)
+                        .attr("dy", 18)
+                        .attr("font-size", 10)
+                    .append("tspan")
+                        .text( "OPS_PLUS")
+                        .attr("x", 0)
+                        .attr("dy", 10)
+                        .attr("font-weight", "normal")
+                    .append("tspan")
+                        .text ( (+P.ops_plus).toFixed(0))
+                        .attr("x", 200)
+                        .attr("text-anchor", "end")
+                    .append("tspan")
+                        .text( "AB")
+                        .attr("x", 0)
+                        .attr("dy", 10)
+                        .attr("text-anchor", "start")
+                    .append("tspan")
+                        .text( P.AB )
+                        .attr("x", 200)
+                        .attr("text-anchor", "end")
+                    .append("tspan")
+                        .text( "Salary")                        
+                        .attr("x", 0)
+                        .attr("dy", 10)
+                        .attr("text-anchor", "start")
+                    .append("tspan")
+                        .text( numberWithCommas(P.salary) )
+                        .attr("x", 200)
+                        .attr("text-anchor", "end");
+            /*  Add icon */
+            g.append("svg:image")
+                    .attr("xlink:href", iconPath)
+                    .attr("x", 160)
+                    .attr("y", 0)                    
+                    .attr("width", 40)
+                    .attr("height", 40);            
+            /* Add line to the data element. */
+            /* Here we need to go outside the <g> element because we need to draw an 
+             *  arrow on the chart itself! */
+            points = [
+            {
+                // bottom center of our text box.
+                x: transX + 100,
+                y: 70
+            },
+            {
+                // x and y-axis translated values of this player
+                x: xAxis(P.year),
+                y: yAxis(P.ratio)
+            }];
+            sel.append("line")
+                .attr("class", className)
+                .style("stroke", linecolor)
+                .attr("stroke-width", 3)
+                .style("opacity", 0.1)
+                .attr("x1", points[0].x)
+                .attr("y1", points[0].y)
+                .attr("x2", points[1].x)
+                .attr("y2", points[1].y);
+
+        }
+
+        function updateLeftHighlight(whichYear) {
+            var temp = agg_baseball.team_dict[t1[whichYear - 1985].team].icon;
+
+            d3.select("#opschart2")
+                .select("g.main")
+                .selectAll(".hi_left")
+                .remove();
+
+            addDataToSelection(d3.select("#opschart2").select("g.main"),
+                t1[whichYear - 1985],
+                "hi_left",
+                temp, 
+                150, "#e66100");
+        }
+
+        function updateRightHighlight(whichYear) {   
+            var temp = agg_baseball.team_dict[t2[whichYear - 1985].team].icon;
+     
+            d3.select("#opschart2")
+                .select("g.main")
+                .selectAll(".hi_right")
+                .remove();
+
+            addDataToSelection(d3.select("#opschart2").select("g.main"),
+                t2[whichYear - 1985],
+                "hi_right",
+                temp, 
+                400, "#5d3a9b");                 
+        }
+
         d3.select("#opschart2")
           .select("g.main")
           .selectAll("text.team1")
@@ -76,6 +184,7 @@ function opsChart2() {
             .join(
                 enter => enter.append("text")
                     .attr("class", "team1")
+                    .attr("text-anchor", "middle")
             )
             .transition(t)
             .attr("x", d => xAxis(d.year))
@@ -91,6 +200,8 @@ function opsChart2() {
             .join(
                 enter => enter.append("text")
                     .attr("class", "team2")
+                    .attr("text-anchor", "middle")
+
             )
             .transition(t)
             .attr("x", d => xAxis(d.year))
@@ -99,24 +210,38 @@ function opsChart2() {
             .style("font-size", "12")
             .attr("stroke", "#5d3a9b");
 
-        /* Add team logos at the end of the chart */
-        svg.selectAll("image")
-            .data([0, 1])
-            .join(
-                enter => enter.append("svg:image")
-            )
-            .transition(t)      
-            .attr("xlink:href", d => {
-                if (d == 0) return agg_baseball.team_dict[team1].icon;
-                else return agg_baseball.team_dict[team2].icon;
-            })
-            .attr("x", xAxis(2017))
-            .attr("y", function(d) {
-                if (d == 0) return yAxis(t1[31].value);
-                else return yAxis(t2[31].value);
-            })
-            .attr("width", 40)
-            .attr("height", 40);
+    svg.append('rect') // append a rect to catch mouse movements on canvas
+        .attr('width', width) // can't catch mouse events on a g element
+        .attr('height', height)
+        .attr('fill', 'none')
+        .attr('pointer-events', 'all')
+        .on('mousedown', function() { // mouse moving over canvas
+            /* Find */
+            var mouse = d3.mouse(this);                        
+            var xYear = Math.round(xAxis.invert(mouse[0]));                        
+            if (xYear < 1981) xYear = 1981;
+            if (xYear > 2016) xYear = 2016;
+            var yPt = mouse[1];
+
+            console.log("mouse " + mouse + " => " + xYear + "," + yPt);
+
+            var p1 = yAxis(t1[xYear - 1985].ratio); //Math.abs(Math.max(25, t1[xYear - 1985].ratio));
+            var p2 = yAxis(t2[xYear - 1985].ratio); // Math.abs(Math.max(25, t2[xYear - 1985].ratio));
+            var d1 = Math.max(7.5, Math.abs(yPt - p1));
+            var d2 = Math.max(7.5, Math.abs(yPt - p2));
+
+            if (d1 < d2) which = 1;
+            else if (d1 == d2) which = 3;
+            else which = 2;
+
+            console.log(which + "," + d1 + "," + d2 + "," + xYear);
+
+            if (which == 1 || which == 3) updateLeftHighlight(xYear);
+            if (which == 2 || which == 3) updateRightHighlight(xYear);
+        });
+
+        updateLeftHighlight(2016);
+        updateRightHighlight(2016);
     }
 
     d3.select("#team3").on('change', helper);

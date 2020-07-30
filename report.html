@@ -63,7 +63,9 @@
 
         p.caption {
             text-align: center;
+        }
 
+        tspan.playerName {
         }
 
         </style>
@@ -275,7 +277,7 @@
                     .append("option")
                     .attr("value", d => d.name)
                     .text( d => d.name )
-                    .attr("selected", function(d) { if (d.name == "White Sox") return true; else return null; });
+                    .attr("selected", function(d) { if (d.name == "Angels") return true; else return null; });
 
 
                 opsChart()
