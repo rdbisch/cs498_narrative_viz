@@ -1,36 +1,82 @@
 <html>
-    <head>
-        <title>CS498-dv Narrative Visualization Projec</title>
-        <script src="https://d3js.org/d3.v5.min.js"></script>
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
-      </head>
-      <body>
+  <head>
+    <title>CS498-dv Narrative Visualization Projec</title>
+    <link rel = "stylesheet" type = "text/css" href = "style.css" />
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <h1>An Analysis of Baseball Salary and Player Effectiveness</h1>
+        <h4>This is the essay explaining the structure and content of the <a href="report.html">narrative visualization</a>.</h4>
+
+        <p><em>These pages are part of rdb4@illinois.edu / rdbisch@gmail.com project for CS498 Data Visualization.</em></p>
       
-      <div class="jumbotron text-center">
-        <h1>My First Bootstrap Page</h1>
-        <p>Resize this responsive page to see the effect!</p> 
+      </div>
+      <div class="row">
+        <h2>Messaging</h2>
+        The intent of my narrative visualization was to walk the reader through an analysis of professional baseball salaries.
+      </div>
+      <div class="row">
+        <h2>Narrative Structure</h2>
+        <p>The structure I choose to tell this story more closely resembles an interactive slide show.  The textual content and charts
+          are tied together with initial defaults that tie together--examples using Cubs, Whitesox; or Cubs, and the Angels, for example--but 
+          the user is encouraged to try the charts out and find supporting or counter evidence.
+      </div>
+
+      <div class="row">
+        <h2>Visual Structure</h2>
+        <p>I choose to use a few different elements to ensure continuity and understanding from the reader.  The first, all but the last chart
+          uses the same x-axis, mainly the year of play.  Second, whenever there are options to compare team's side-by-side, I used consistent
+          colors to show the left-selection vs. the right-selection.  Third, transitions are used where it made sense to help the user understand
+          what exactly was changing when different selections were made.
+        </p>
       </div>
         
-      <div class="container">
-        <div class="row">
-          <div class="col-sm-4">
-            <h3>Column 1</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-          </div>
-          <div class="col-sm-4">
-            <h3>Column 2</h3>
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-          </div>
-          <div class="col-sm-4">
-            <h3>Column 3</h3>        
-            <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-            <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-          </div>
-        </div>
+      <div class="Row">
+        <h2>Scenes</h2>
+        <p>There are four main scenes:</p>
+        <ul>
+          <li>The Consumer Product Index (CPI) vs. Aggregate Baseball Salaries.<p></p>This secenes sets 
+            the stage for the entire visualization by establishing how much faster than inflation
+          these sports players salaries are.   Currently it is a more or less a static display, through
+          I suppose it could also by implemented to be consistent with the visualizaiton schemes below...</p>
+
+          <li>Player performance (per salary) over time.<p>This is used to establish evidence that player's performance
+            is not rising consummate with their income.  TODO add annotation for this--maybe trendline?</p>
+          </li>
+
+          <li>Best-Player performance (per salary) over time.  <p>This is used to test the conjencture that averaging a team's
+            washed out any signal. Spoiler: it doesn't.  </li>
+
+          <li>Finally, Performance by Tenure. <p>This is used to highlight the effect of salary controls on rookie players and to
+            explain some abnormalities seen in the prior scene</p>
+        </ul>
+
+        <p>The order displayed is very intentional.  The first scene (CPI) sets the stage for the remainder--salaries are absurd.  The second scene
+          dives into a natural place to start looking into "why?".  There are many other places we could have started--team revenue, ticket sales, ad revenue,
+          merchandise sales, etc. But baseball affecienados only care about one thing.  Performance!  Having seen a contrary trend, the next two scenes further
+          dive into two conjenctures the reader is likely to form themselves--why are teams seemingly getting worse? and why do rookies show up so well?
+        </p>        
       </div>
-    </body>
+      <div class="row">
+        <h2>Annotations</h2>
+        <p>What template was followed for the annotations, and why that template? How are
+          the annotations used to support the messaging? Do the annotations change within a single scene,
+          and if so, how and why</p>
+      </div>
+      <div class="row">
+        <h2>Parameters</h2>
+        <p> What are the parameters of the narrative visualization? What are the states of the
+          narrative visualization? How are the parameters used to define the state and each scene?</p>
+      </div>
+      <div class="row">
+        <h2>Triggers</h2>
+        <p>What are the triggers that connect user actions to changes of state in the narrative
+          visualization? What affordances are provided to the user to communicate to them what options are
+          available to them in the narrative visualization? </p>
+      </div>
+    </div>
+  </body>
 </html>
       

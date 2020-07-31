@@ -57,7 +57,6 @@ function cpiChart() {
         
     /* Highlight a specific year and annotate it */
     function updateSelection(selectedPoint) {    
-        console.log("Updating selection with year " + selectedPoint);            
         var t = combinedSalaryCPI[selectedPoint - 1981];
         var subset = [
             {x: selectedPoint,

@@ -2,7 +2,7 @@ opsChart2_setup = false;
 
 /* Encapsulate logic to draw CPI vs Salary chart */
 function opsChart2() {
-    margin = {top: 20, bottom: 20, left: 20, right: 20};
+    margin = {top: 20, bottom: 50, left: 50, right: 20};
     width = 800;
     height = 500;
 
@@ -57,6 +57,51 @@ function opsChart2() {
     svg.append("g")
         .call(d3.axisLeft().scale(yAxis));
 
+    /* X-axis label  */
+    d3.select("#opschart2")
+        .append("text")
+        .attr("x", width / 2)
+        .attr("y", height - 20)
+        .attr("text-anchor", "middle")
+        .text("Years in the Major Leagues");
+
+    /* Add an explanation of the yAxis */ 
+    d3.select("#opschart2")
+        .append("text")
+        .attr("x", 0)
+        .attr("y", height / 2)
+        .attr("text-anchor", "middle")
+        .text("OPS_PLUS per $1m Salary")
+        .attr("transform", "rotate(-90 10" + "," + height/2 + ")");
+        ;
+
+
+    /*** Add an annotation ***/
+    svg.append("ellipse")
+        .attr("cx", xAxis(2005))
+        .attr("cy", yAxis(.15))
+        .attr("rx", 0.5*(xAxis(2020) - xAxis(1995)))
+        .attr("ry", -0.5*(yAxis(.25) - yAxis(0.05)))
+        .attr("fill", "#CCE9F6");
+
+    svg.append("text")
+        .attr("x", xAxis(1990))
+        .attr("y", yAxis(0.25))
+        .append("tspan")
+            .text("Players in this zone are almost always rookies")
+        .append("tspan")
+            .attr("x", xAxis(1990))
+            .attr("dy", 20)
+            .text("due to a salary struture change that resulted in")
+        .append("tspan")
+            .attr("x", xAxis(1990))
+            .attr("dy", 20)
+            .text("new-player salaries being paid league minimum")
+        .append("tspan")
+            .attr("x", xAxis(1990))
+            .attr("dy", 20)
+            .text(" for their first few years.");
+        
     function updateData(team1, team2) {
         // Shortcut for easier code
         var t1 = restateData(agg_baseball.best[team1]);
@@ -223,8 +268,6 @@ function opsChart2() {
             if (xYear > 2016) xYear = 2016;
             var yPt = mouse[1];
 
-            console.log("mouse " + mouse + " => " + xYear + "," + yPt);
-
             var p1 = yAxis(t1[xYear - 1985].ratio); //Math.abs(Math.max(25, t1[xYear - 1985].ratio));
             var p2 = yAxis(t2[xYear - 1985].ratio); // Math.abs(Math.max(25, t2[xYear - 1985].ratio));
             var d1 = Math.max(7.5, Math.abs(yPt - p1));
@@ -233,8 +276,6 @@ function opsChart2() {
             if (d1 < d2) which = 1;
             else if (d1 == d2) which = 3;
             else which = 2;
-
-            console.log(which + "," + d1 + "," + d2 + "," + xYear);
 
             if (which == 1 || which == 3) updateLeftHighlight(xYear);
             if (which == 2 || which == 3) updateRightHighlight(xYear);

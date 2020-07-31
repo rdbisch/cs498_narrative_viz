@@ -3,83 +3,20 @@
         <title>CS498-dv Narrative Visualization Project - View 1</title>
         <script src="https://d3js.org/d3.v5.min.js"></script>
 
-        <style type="text/css">
-        body {
-            font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
-            font-weight: 300;
-            background-image: url("wrigley.jpg");
-            background-color: #eaffd5;
-        }
+        <link rel = "stylesheet" type = "text/css" href = "style.css" />
 
-        th {
-            border-bottom: thick double;
-        }
-
-        tfoot td {
-            border-top: solid
-        }
-
-        td {
-            padding:0 15px;
-        }
-
-        tbody {
-            
-        }
-
-        table.center {            
-            margin: auto;
-            display: block;
-        }
-
-        div.container {
-            margin: auto;
-            width: 60%;
-        }
-
-        div.row {
-            margin: 10px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.9);
-            width: 100%;
-            display: inline-block
-        }
-
-        div.chart {
-            display: block;
-            width: 100%;
-            margin-left: auto;
-            margin-right: auto;
-        }
-
-        figure.scene {            
-            margin: 4pt;
-            padding: 16pt;
-        }
-
-        figcaption {
-            font-style: italic;
-        }
-
-        p.caption {
-            text-align: center;
-        }
-
-        tspan.playerName {
-        }
-
-        </style>
-
+        <script src="parse_baseball.js"></script>
         <script src="cpi_chart.js"></script>
         <script src="ops_chart.js"></script>
         <script src="ops_chart2.js"></script>
-        <script src="parse_baseball.js"></script>
+        <script src="ops_chart3.js"></script>
     </head>
     <body onload="loadData()">
         <div class="container">
             <div class="row">
                 <h1>An Analysis of Baseball Salary and Player Effectiveness</h1>
                 <h4>Baseball salaries have been outpacing inflation year over year since data was available.  Is player performance keeping pace?</h4>
+
                 <p><em>These pages are part of rdb4@illinois.edu / rdbisch@gmail.com project for CS498 Data Visualization.</em></p>
                 
                 <p>This narrative visualization is based on the <a href="http://www.seanlahman.com/baseball-archive/statistics/">2019 Lahman Baseball database</a>
@@ -138,7 +75,7 @@
                     <svg id="opschart" viewBox="0 0 800 500" width="100%">                        
                     </svg>
                     <div id="opsannotate" class="chart"></div>
-                    <figcaption>Chart showing weighted average OPS_PLUS over time for selected teams</figcaption>
+                    <figcaption>Weighted average OPS_PLUS trend over time for selected teams</figcaption>
                 </figure> 
             </div>
             <div class="row">
@@ -171,7 +108,9 @@
                     <svg id="opschart2" viewBox="0 0 800 500" width="100%">                        
                     </svg>
                     <div id="opsannotate2" class="chart"></div>
-                    <figcaption>Chart showing performance of the best player for the selected teams.</figcaption>
+                    <figcaption>Performance-per-dollar of the best player per year for the selected teams.   Points are labelled with player initials to make it easier
+                         to see who is a superstar year over year.
+                    </figcaption>
                 </figure> 
             </div>
             <div class="row">
@@ -186,6 +125,24 @@
                 <p>You can see this affect pretty dramatically with Mike Trout's ealier seasons and as he moved from rookie status.</p>
 
                 <p>By the way, you can click on the indiviidual years in this chart to get detailed statistics from each player/year.</p>
+            </div>
+            <div class="row">
+                <figure class="scene">
+                    <form id="opsform3">
+                        <label for="team5">Team #1</label>
+                        <!-- Form gets populated by d3 below -->
+                        <select name="team5" id="team5">                            
+                        </select>
+                        <label for="team6">Team #1</label>
+                        <!-- Form gets populated by d3 below -->
+                        <select name="team6" id="team6">                            
+                        </select>
+                    </form>
+                    <svg id="opschart3" viewBox="0 0 800 500" width="100%">                        
+                    </svg>
+                    <div id="opsannotate3" class="chart"></div>
+                    <figcaption>Performance per dollar by player tenure in baseball.   Data restricted here 2010-2016 to minimize effects of inflation.</figcaption>
+                </figure> 
             </div>
         </div>
         <script>
@@ -242,9 +199,8 @@
                 });
 
                 agg_baseball = createAggBaseball();
-                
-                console.log(agg_baseball);
-                console.log(combinedSalaryCPI);
+               
+
                 cpiChart();
 
                 // Setup data for forms
@@ -255,48 +211,28 @@
                         value: key
                     });
                 }
-                d3.select("#team1")
-                    .selectAll("option")
-                    .data(form_input)
-                    .enter()
-                    .append("option")
-                    .attr("value", d => d.name)
-                    .text( d => d.name )
-                    .attr("selected", function(d) { if (d.name == "Cubs") return true; else return null; })
-                    ;
 
-                d3.select("#team2")
-                    .selectAll("option")
-                    .data(form_input)
-                    .enter()
-                    .append("option")
-                    .attr("value", d => d.name)
-                    .text( d => d.name )
-                    .attr("selected", function(d) { if (d.name == "White Sox") return true; else return null; });
-
-
-                d3.select("#team3")
-                    .selectAll("option")
-                    .data(form_input)
-                    .enter()
-                    .append("option")
-                    .attr("value", d => d.name)
-                    .text( d => d.name )
-                    .attr("selected", function(d) { if (d.name == "Cubs") return true; else return null; })
-                    ;
-
-                d3.select("#team4")
-                    .selectAll("option")
-                    .data(form_input)
-                    .enter()
-                    .append("option")
-                    .attr("value", d => d.name)
-                    .text( d => d.name )
-                    .attr("selected", function(d) { if (d.name == "Angels") return true; else return null; });
-
+                function appendSels(sel, selected) {
+                    d3.select(sel)
+                        .selectAll("option")
+                        .data(form_input)
+                        .enter()
+                        .append("option")
+                        .attr("value", d => d.name)
+                        .text( d => d.name )
+                        .attr("selected", function(d) { if (d.name == selected) return true; else return null; })
+                        ;
+                }
+                appendSels("#team1", "Cubs");
+                appendSels("#team2", "White Sox");
+                appendSels("#team3", "Cubs");
+                appendSels("#team4", "Angels");
+                appendSels("#team5", "Cubs");
+                appendSels("#team6", "Dodgers");
 
                 opsChart()
                 opsChart2();
+                opsChart3();
             }
         </script>
     </body>

@@ -1,0 +1,63 @@
+body {
+    font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+    font-weight: 300;
+    background-image: url("wrigley.jpg");
+    background-color: #eaffd5;
+}
+
+th {
+    border-bottom: thick double;
+}
+
+tfoot td {
+    border-top: solid
+}
+
+td {
+    padding:0 15px;
+}
+
+tbody {
+    
+}
+
+table.center {            
+    margin: auto;
+    display: block;
+}
+
+div.container {
+    margin: auto;
+    width: 60%;
+}
+
+div.row {
+    margin: 10px;
+    padding: 10px;
+    background-color: rgba(255, 255, 255, 0.9);
+    width: 100%;
+    display: inline-block
+}
+
+div.chart {
+    display: block;
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+figure.scene {            
+    margin: 4pt;
+    padding: 16pt;
+}
+
+figcaption {
+    font-style: italic;
+}
+
+p.caption {
+    text-align: center;
+}
+
+tspan.playerName {
+}

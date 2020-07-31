@@ -75,7 +75,8 @@ function createAggBaseball() {
         salary: {},
         AB: {},
         ops_per_dollar: {},
-        best: {}
+        best: {},
+        rookie: {}
     }
     var t_y = {}
     var t_t = {}
@@ -121,13 +122,13 @@ function createAggBaseball() {
     t_t["Red Sox"].icon = path + "boston.gif";
     t_t["Reds"].icon = path + "cincinnati.gif";
     t_t["Rockies"].icon = path + "colorado.gif";
+    t_t["Royals"].icon = path + "kc.gif";
     t_t["Tigers"].icon = path + "detroit.gif";
     t_t["Twins"].icon = path + "minnesota.gif";
     t_t["White Sox"].icon = path + "chicago_sox.gif";
     t_t["Yankees"].icon = path + "nyy.gif";
 
     result.team_dict = t_t;
-    console.log(baseball_data);
 
     baseball_data.forEach((el, idx) => {
         if (!(el.teamName in result.OPS_PLUS)) {
@@ -136,12 +137,34 @@ function createAggBaseball() {
             result.ops_per_dollar[el.teamName] = {};
             result.AB[el.teamName] = {};
             result.best[el.teamName] = {}
+            result.rookie[el.teamName] = {}
         }
         if (!(el.year in result.OPS_PLUS[el.teamName])) {
             result.OPS_PLUS[el.teamName][el.year] = 0;
             result.salary[el.teamName][el.year] = 0;
             result.AB[el.teamName][el.year] = 0;
             result.best[el.teamName][el.year] = {};
+        }
+
+        var yearsInLeague = el.year - el.debutYear;
+        if (yearsInLeague >= 10) yearsInLeague = 10;
+        else yearsInLeague = yearsInLeague;
+
+        if (!(yearsInLeague in result.rookie[el.teamName])) {
+            result.rookie[el.teamName][yearsInLeague] = {
+                AB: 0,
+                ops_plus_ab: 0,
+                salary: 0
+            }
+        }
+
+        if (el.year >= 2010) {
+            var tt = result.rookie[el.teamName][yearsInLeague];
+            tt.ops_plus_ab = (tt.ops_plus_ab * tt.AB) + (el.OPS_PLUS*el.AB);
+            tt.AB += el.AB;
+            tt.ops_plus_ab = tt.ops_plus_ab / tt.AB;
+            tt.salary += el.salary;
+            result.rookie[el.teamName][yearsInLeague] = tt; 
         }
 
         var t = result.best[el.teamName][el.year];
@@ -212,4 +235,38 @@ function createAggBaseball() {
     result.ops_per_dollar = t.replacement;
     result.ops_per_dollar_extent = t.extent;
     return result;
+}
+
+function quickRegression(data, xfield, yfield) {
+    var x = 0;
+    var y = 0;
+    var xx = 0;
+    var xy = 0;
+    var n = 0;
+    var minx = null;
+    var maxx = null;
+    var first = true;
+
+    for (const el of data) {
+        var tx = +el[xfield];
+        var ty = +el[yfield];
+        if (first) {
+            minx = tx;
+            maxx = tx;
+            first = false;
+        }
+        if (tx < minx) minx = tx;
+        if (tx > maxx) maxx = tx;
+        x += tx;
+        y += ty;
+        xx += tx * tx;
+        xy += tx * ty;
+        n += 1;
+    }
+
+    var slope = (xy - x*y/n) / xx;
+    var intercept = (y - slope*x) / n;
+
+    function L(tx) { return (intercept + slope*tx); }
+    return [{x: minx, y: L(minx)}, {x: maxx, y: L(maxx)}]
 }
