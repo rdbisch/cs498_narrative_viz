@@ -109,7 +109,7 @@
                     </svg>
                     <div id="opsannotate2" class="chart"></div>
                     <figcaption>Performance-per-dollar of the best player per year for the selected teams.   Points are labelled with player initials to make it easier
-                         to see who is a superstar year over year.
+                         to see who is a superstar year over year.   Click on initials to get more details on that player for the selected year.
                     </figcaption>
                 </figure> 
             </div>
@@ -119,12 +119,11 @@
                 <p>There is an interesting effect happening in the default example displayed, and you can see it in other team selections two.  Baseball
                     has strutured their salary program such that rookies are insanely cheap for what they produce.  Compare Kris Bryant's 2016 season to Mike Trouts.
 
-                <p>Bryant looks like a rock-star, and he is to be sure.  But is he better than Trout?  Not when you look at the numbers.  In fact Trout had a better season and 
-                    was paid nearly $10 million more than Bryant.  This is because baseball pays rookies so little until they get more years on their contracts.
+                <p>Bryant looks like a rock-star, and he is to be sure.  But is he better than Trout?  Not when you look at the numbers--Trout had a full 21 more points in OPS_PLUS.
+                    Is that worth $10 million more than Bryant? No.  Bryant is paid so little because baseball pays rookies so little until they enter free-agency and can renegotiate their contracts.
                     
-                <p>You can see this affect pretty dramatically with Mike Trout's ealier seasons and as he moved from rookie status.</p>
+                <p>You can see this affect pretty dramatically with Mike Trout.  His performance is actually better year over-year, but this affect is dominated by his increasing salary as he entered free-agency.</p>
 
-                <p>By the way, you can click on the indiviidual years in this chart to get detailed statistics from each player/year.</p>
             </div>
             <div class="row">
                 <figure class="scene">
@@ -141,7 +140,12 @@
                     <svg id="opschart3" viewBox="0 0 800 500" width="100%">                        
                     </svg>
                     <div id="opsannotate3" class="chart"></div>
-                    <figcaption>Performance per dollar by player tenure in baseball.   Data restricted here 2010-2016 to minimize effects of inflation.</figcaption>
+                    <figcaption>Performance per dollar by player tenure in baseball.   Data restricted here 2010-2016 to minimize effects of inflation.
+                        Free-agency is pretty complicated in baseball, as it starts from the day the contract is signed and not when a player starts playing in the majors.  Nonetheless
+                                 most major league players are in free-agency anywhere from year 3-6, and we do see
+                                 a step decline here in performance per dollar, consistent with significant change
+                                 in salary, as opposed to performance.                                
+                    </figcaption>
                 </figure> 
             </div>
         </div>

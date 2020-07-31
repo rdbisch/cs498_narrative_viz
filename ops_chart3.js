@@ -1,6 +1,6 @@
 /* Encapsulate logic to draw CPI vs Salary chart */
 function opsChart3() {
-    margin = {top: 20, bottom: 50, left: 50, right: 20};
+    margin = {top: 20, bottom: 50, left: 50, right: 50};
     width = 800;
     height = 500;
 
@@ -115,7 +115,7 @@ function opsChart3() {
         .text("Trend for Team 2");
     /*** --end create legend *****/        
 
-function updateData(team1, team2) {
+    function updateData(team1, team2) {
         function helper(d) {
             result = []
             for (const [key, value] of Object.entries(d)) {
@@ -211,8 +211,32 @@ function updateData(team1, team2) {
             .attr("r", d => 5)
             .attr("fill", "#5d3a9b");
 
+        // Check for logo collision
+        var t1_y = yAxis(t1_regress[1].y);
+        var t2_y = yAxis(t2_regress[1].y);
+        if (Math.abs(t1_y - t2_y) < 40) {
+            if (t2_y < t1_y) { t2_y -= 20; t1_y += 20; }
+            else { t2_y += 20; t1_y -= 20; }
+        }
 
-
+        /* Add team logos at the end of the chart */
+        svg.selectAll("image")
+            .data([0, 1])
+            .join(
+                enter => enter.append("svg:image")
+            )
+            .transition(t)      
+            .attr("xlink:href", d => {
+                if (d == 0) return agg_baseball.team_dict[team1].icon;
+                else return agg_baseball.team_dict[team2].icon;
+            })
+            .attr("x", xAxis(10))
+            .attr("y", function(d) {
+                if (d == 0) return t1_y;
+                else return t2_y;
+            })
+            .attr("width", 40)
+            .attr("height", 40);
     }
     d3.select("#team5").on('change', helper2);
     d3.select("#team6").on('change', helper2);

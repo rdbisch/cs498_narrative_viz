@@ -63,7 +63,7 @@ function opsChart2() {
         .attr("x", width / 2)
         .attr("y", height - 20)
         .attr("text-anchor", "middle")
-        .text("Years in the Major Leagues");
+        .text("Year");
 
     /* Add an explanation of the yAxis */ 
     d3.select("#opschart2")

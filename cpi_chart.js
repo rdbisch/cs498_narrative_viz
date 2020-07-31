@@ -174,7 +174,6 @@ function cpiChart() {
             var xYear = Math.floor(xAxis.invert(mouse[0]));                        
             if (xYear < 1981) xYear = 1981;
             if (xYear > 2016) xYear = 2016;
-            console.log(xYear);
             if (xYear != currentSelection) {
                 updateSelection(xYear);
                 currentSelection = xYear;
