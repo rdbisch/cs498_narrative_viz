@@ -1,3 +1,9 @@
+/** parseBaseball.js
+ *  rdb4 / rdbisch
+ *  
+ *  Utility funcitons to easy processing of baseball data.
+ */
+
 /* Script to convert CSV baseball data into the right types for d3 */
 function importLahman(row) {
     return {
@@ -46,6 +52,7 @@ function importLahman(row) {
     };
 }
 
+/* Aggregate salary over a specific year. */
 function sumBaseballSalary(year) {
     var result = 0;
     baseball_data.forEach(el => {
@@ -54,6 +61,9 @@ function sumBaseballSalary(year) {
     return result;
 }
 
+/* The data comes in about 15k rows.  This function
+ * aggregaes the data into more useful entities, such as team, year, best player
+ * etc. */
 function createAggBaseball() {
     /* We want this array to look like this 
         *
@@ -237,13 +247,20 @@ function createAggBaseball() {
     return result;
 }
 
+/** Simple linear regression y = mx + b
+ *  Does not return "m" or "b", but instead it
+ *  calculates the extent of "x" and returns the
+ *  predicted "yhat" at both the min and max of x.
+ * 
+ * The reason why is that this is designed for plot use.
+ */
 function quickRegression(data, xfield, yfield) {
-    var x = 0;
-    var y = 0;
-    var xx = 0;
-    var xy = 0;
-    var n = 0;
-    var minx = null;
+    var x = 0;      // hold running total of n*xbar
+    var y = 0;      // hold running total of n*ybar
+    var xx = 0;     // hold running total of x*x
+    var xy = 0;     // hold running total of x*y
+    var n = 0;      
+    var minx = null;    // used to calcualate the extent of x
     var maxx = null;
     var first = true;
 
@@ -264,6 +281,9 @@ function quickRegression(data, xfield, yfield) {
         n += 1;
     }
 
+    // slope equation might look weird if you're used to seeing it a different way
+    // because x is actually Sum[x_i] = n*xbar and y is actually Sum[y_i] = n*ybar,
+    // x*y = n^2 xbar ybar.  Hence we divide by n.
     var slope = (xy - x*y/n) / xx;
     var intercept = (y - slope*x) / n;
 

@@ -1,8 +1,13 @@
-/* Encapsulate logic to draw CPI vs Salary chart */
+/** ops_chart.js
+ *  rdb4 / rdbisch
+ *  
+ *  Subroutine to setup and update #opsChart
+ */
+
 function opsChart() {
-    margin = {top: 20, bottom: 50, left: 50, right: 20};
-    width = 800;
-    height = 500;
+    var margin = {top: 20, bottom: 50, left: 50, right: 20};
+    var width = 800;
+    var height = 500;
 
     var team1_color = "#e66100";
     var team2_color = "#5d3a9b";
@@ -14,7 +19,6 @@ function opsChart() {
         .append("g")
         .attr("class", "main")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
    
     var xAxis = d3.scaleLinear()
         .domain([1985, 2020])
@@ -120,7 +124,6 @@ function opsChart() {
             .text("Trend for Team 2");
     /*** --end create legend *****/
 
-
     /* Add an annotation */
     svg.append("text")
         .attr("x", xAxis(2005))
@@ -140,9 +143,11 @@ function opsChart() {
             .attr("dy", 15)
             .text("indicated by the flat trend lines.")
 
-
+    /* Updates to data are done here, rather than re-calling opsChart
+     *  so that we're only updating the SVG elements that are data
+     *  dependent
+     */
     function updateData(team1, team2) {
-        // Shortcut for easier code
         var t1 = agg_baseball.OPS_PLUS[team1];
         var t1_regress = quickRegression(t1, "year", "value");
         var t2 = agg_baseball.OPS_PLUS[team2];
@@ -204,7 +209,23 @@ function opsChart() {
             .attr("r", 5)
             .attr("fill", team2_color);
 
-        // Check for logo collision
+        // Draw an arrow from the text annotation to the lowest trendline.
+        var low_y = Math.min(t1_regress[1].y, t2_regress[1].y);
+        svg.selectAll("path.annotation")
+            .data([0])
+            .join(
+                enter => enter.append("path")
+                    .attr("class", "annotation")
+            )
+            .datum([{x: 2005, y: 90}, {x: 2000, y: low_y}])
+            .transition(t)
+            .attr("d", line2)
+            .attr("fill", "none")
+            .attr("stroke", "#aaaaaa")
+            .attr("stroke-width", 3);
+
+        // Check for logo collision--if they do collide move them half-height
+        //  in opposite directions.
         var t1_y = yAxis(t1_regress[1].y);
         var t2_y = yAxis(t2_regress[1].y);
         if (Math.abs(t1_y - t2_y) < 40) {
@@ -231,6 +252,7 @@ function opsChart() {
             .attr("width", 40)
             .attr("height", 40);
     }
+
     d3.select("#team1").on('change', helper);
     d3.select("#team2").on('change', helper);
     helper();

@@ -1,10 +1,12 @@
-opsChart2_setup = false;
-
-/* Encapsulate logic to draw CPI vs Salary chart */
+/** ops_chart2.js
+ *  rdb4 / rdbisch
+ *  
+ *  Subroutine to setup and update #opsChart2
+ */
 function opsChart2() {
-    margin = {top: 20, bottom: 50, left: 50, right: 20};
-    width = 800;
-    height = 500;
+    var margin = {top: 20, bottom: 50, left: 50, right: 20};
+    var width = 800;
+    var height = 500;
 
     var svg = d3.select("#opschart2")
         .selectAll("g.main")
@@ -14,7 +16,7 @@ function opsChart2() {
         .attr("class", "main")
         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-    extent = [null, null];
+    var extent = [null, null];
     function restateData(X) {
         var temp = [];
         for (const [key, value] of Object.entries(X)) {
@@ -88,19 +90,19 @@ function opsChart2() {
         .attr("x", xAxis(1990))
         .attr("y", yAxis(0.25))
         .append("tspan")
-            .text("Players in this zone are almost always rookies")
+            .text("Players in this zone are almost always in their")
         .append("tspan")
             .attr("x", xAxis(1990))
             .attr("dy", 20)
-            .text("due to a salary struture change that resulted in")
+            .text("first few seasons due to a salary struture change ")
         .append("tspan")
             .attr("x", xAxis(1990))
             .attr("dy", 20)
-            .text("new-player salaries being paid league minimum")
+            .text("causing new-player salaries being paid league ")
         .append("tspan")
             .attr("x", xAxis(1990))
             .attr("dy", 20)
-            .text(" for their first few years.");
+            .text("minimum for their first few years.");
         
     function updateData(team1, team2) {
         // Shortcut for easier code
@@ -108,7 +110,6 @@ function opsChart2() {
         var t2 = restateData(agg_baseball.best[team2]);        
         var t = d3.transition()
             .duration(1500);
-
 
         function addDataToSelection(sel, P, className, iconPath, transX, linecolor) {
             var g = sel.append("g")
@@ -261,18 +262,21 @@ function opsChart2() {
         .attr('fill', 'none')
         .attr('pointer-events', 'all')
         .on('mousedown', function() { // mouse moving over canvas
-            /* Find */
+            /* Find which point the user is clicking on */
             var mouse = d3.mouse(this);                        
             var xYear = Math.round(xAxis.invert(mouse[0]));                        
             if (xYear < 1981) xYear = 1981;
             if (xYear > 2016) xYear = 2016;
             var yPt = mouse[1];
 
-            var p1 = yAxis(t1[xYear - 1985].ratio); //Math.abs(Math.max(25, t1[xYear - 1985].ratio));
-            var p2 = yAxis(t2[xYear - 1985].ratio); // Math.abs(Math.max(25, t2[xYear - 1985].ratio));
+            var p1 = yAxis(t1[xYear - 1985].ratio);
+            var p2 = yAxis(t2[xYear - 1985].ratio);
+            // 7.5 came from trial and error about what felt right.
             var d1 = Math.max(7.5, Math.abs(yPt - p1));
             var d2 = Math.max(7.5, Math.abs(yPt - p2));
 
+            // If the distances are so close that we can't
+            // disambiguate, just change both selections.
             if (d1 < d2) which = 1;
             else if (d1 == d2) which = 3;
             else which = 2;

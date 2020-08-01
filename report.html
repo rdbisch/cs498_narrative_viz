@@ -17,14 +17,14 @@
                 <h1>An Analysis of Baseball Salary and Player Effectiveness</h1>
                 <h4>Baseball salaries have been outpacing inflation year over year since data was available.  Is player performance keeping pace?</h4>
 
-                <p><em>These pages are part of rdb4@illinois.edu / rdbisch@gmail.com project for CS498 Data Visualization.</em></p>
+                <p><em>These pages are part of rdb4@illinois.edu / rdbisch@gmail.com project for CS498 Data Visualization.   Here is the <a href="index.html">accompanying essay</a> explaining the choices made in the narrative visualization.</em></p>
                 
                 <p>This narrative visualization is based on the <a href="http://www.seanlahman.com/baseball-archive/statistics/">2019 Lahman Baseball database</a>
                     with a variety of filters applied to simplify the analysis:
                     <ul>
-                        <li>We restrict analysis to non-pitchers only as the analysis focuses heavily on batting performance.   In the National Legague, pitchers bat, but are notriously bad at it.  In the American League, pitchers do not bat.</li>
-                        <li>We calculate the player's primary position as the position they most often started in.  This may not coincide with their identified position in offical stats.
-                        <li>We treat teams that have changed identification over the years as being one in the same.  In particular, California Angels or Los Angelas Angels or Anaheim, are all treated as "Angels".  Similarly for Marlins and Brewers teams.
+                        <li>We restrict analysis to non-pitchers only as the analysis focuses heavily on batting performance.   In the National League, pitchers bat, but are notoriously bad at it.  In the American League, pitchers do not bat.</li>
+                        <li>We calculate the player's primary position as the position they most often started in.  This may not coincide with their identified position in official stats.
+                        <li>We treat teams that have changed identification over the years as being one in the same.  In particular, California Angels or Los Angeles Angels or Anaheim, are all treated as "Angels".  Similarly for Marlins and Brewers teams.
                         <li>We are only looking at seasons where salary data was readily available, which translates into 1984 and beyond.
                     </ul>
 
@@ -53,12 +53,12 @@
                 <p>The modeling of this variable takes into account the players batting performance, fielding performance, and controls
                     for factors like varying pitching ability and field elevation.   
 
-                <p>We will focus our analysis on the batting components of WAR.  In partciular, we will look at on-base percentage
+                <p>We will focus our analysis on the batting components of WAR.  In particular, we will look at on-base percentage
                     relative to average league performance and SLUGing average (number of bases on average per hit) relative to league 
                     performance.  The sum of these statistics, OPS_PLUS, is a major factor in WAR calculations.
 
-                <p>As a gentle introduction, let's consider everyone's favorite team the Chicago Cubs, a team that notriously spends 
-                    lots on player's salary, to their rivals from the southside, the Chicago White Sox.  
+                <p>As a gentle introduction, let's consider everyone's favorite team the Chicago Cubs, a team that notoriously spends 
+                    lots on player's salary, to their rivals from the south-side, the Chicago White Sox.  
                 </p>
             </div>
             <div class="row">
@@ -84,15 +84,10 @@
                     
                 <p>Not a very compelling case--certainly not one to justify $2 Billion in salary.
 
-                <p>Still, there might be reasons other than performance to justify these salaries--the popularity
-                    of baseball may have been increased, the player's themselves did a better job of negotiation, 
-                    or there may be yet more confounds.
+                <p>Still, there might be reasons other than performance to justify these salaries--the popularity of baseball may have been increased, the player's themselves did a better job of negotiation, or there may be yet more confounds.
 
-                <p>Another potential issue is that, by averaging the entire team's OPS_PLUS, we have washed out the 
-                    effect of the best players.   In the chart below, we isolate the highest performing player for 
-                    each team, and normalize by their salary.  That is to say, we look at who has the highest AB*OPS_PLUS / Salary
-                    on each team, year combination.  If team's are getting better at scouting talent and getting breakout
-                    players, it should show up here.
+                <p>Another potential issue is that, by averaging the entire team's OPS_PLUS, we have washed out the effect of the best players.   In the chart below, we isolate the highest performing player for each team, and normalize by their salary.  That is to say, we look at who has the highest AB*OPS_PLUS / Salary
+                on each team, year combination.  If team's are getting better at talent and getting breakout players, it should show up here.
             </div>
             <div class="row">
                 <figure class="scene">
@@ -117,7 +112,7 @@
                 <p>Performance-per-dollar of the best players are getting worse over time!  
 
                 <p>There is an interesting effect happening in the default example displayed, and you can see it in other team selections two.  Baseball
-                    has strutured their salary program such that rookies are insanely cheap for what they produce.  Compare Kris Bryant's 2016 season to Mike Trouts.
+                    has structured their salary program such that rookies are insanely cheap for what they produce.  Compare Kris Bryant's 2016 season to Mike Trouts.
 
                 <p>Bryant looks like a rock-star, and he is to be sure.  But is he better than Trout?  Not when you look at the numbers--Trout had a full 21 more points in OPS_PLUS.
                     Is that worth $10 million more than Bryant? No.  Bryant is paid so little because baseball pays rookies so little until they enter free-agency and can renegotiate their contracts.
@@ -140,11 +135,7 @@
                     <svg id="opschart3" viewBox="0 0 800 500" width="100%">                        
                     </svg>
                     <div id="opsannotate3" class="chart"></div>
-                    <figcaption>Performance per dollar by player tenure in baseball.   Data restricted here 2010-2016 to minimize effects of inflation.
-                        Free-agency is pretty complicated in baseball, as it starts from the day the contract is signed and not when a player starts playing in the majors.  Nonetheless
-                                 most major league players are in free-agency anywhere from year 3-6, and we do see
-                                 a step decline here in performance per dollar, consistent with significant change
-                                 in salary, as opposed to performance.                                
+                    <figcaption>Performance per dollar by player tenure in baseball.   Data restricted here 2010-2016 to minimize effects of inflation.  Free-agency is pretty complicated in baseball, as it starts from the day the contract is signed and not when a player starts playing in the majors.  Nonetheless most major league players are in free-agency anywhere from year 3-6, and we do see a step decline here in performance per dollar, consistent with significant change in salary, as opposed to performance.                                
                     </figcaption>
                 </figure> 
             </div>
@@ -227,6 +218,8 @@
                         .attr("selected", function(d) { if (d.name == selected) return true; else return null; })
                         ;
                 }
+                // Populate the HTML forms with the team names and 
+                // set the defaults to values that are tied to the story
                 appendSels("#team1", "Cubs");
                 appendSels("#team2", "White Sox");
                 appendSels("#team3", "Cubs");

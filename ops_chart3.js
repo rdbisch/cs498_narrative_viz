@@ -1,8 +1,11 @@
-/* Encapsulate logic to draw CPI vs Salary chart */
-function opsChart3() {
-    margin = {top: 20, bottom: 50, left: 50, right: 50};
-    width = 800;
-    height = 500;
+/** ops_chart3.js
+ *  rdb4 / rdbisch
+ *  
+ *  Subroutine to setup and update #opsChart3
+ */function opsChart3() {
+    var margin = {top: 20, bottom: 50, left: 50, right: 50};
+    var width = 800;
+    var height = 500;
 
     var team1_color = "#e66100";
     var team2_color = "#5d3a9b";
